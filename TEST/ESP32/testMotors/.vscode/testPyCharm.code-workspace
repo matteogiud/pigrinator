@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "../../../../pigriPy/testPyCharm"
+		},
+		{
+			"name": "serial:/COM3",
+			"uri": "serial://com3/"
+		},
+		{
+			"name": "testMotors",
+			"path": ".."
+		}
+	],
+	"settings": {}
+}
