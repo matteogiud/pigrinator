@@ -3,7 +3,8 @@ from lib.wifiSecure import loadWifi, search
 import network
 import time
 import uasyncio
-from lib.microdot_asyncio import Microdot
+from lib.microdot_asyncio import Microdot, Response, send_file
+from lib.microdot_utemplate import render_template
 
 class WIFIManager:
     
