@@ -12,7 +12,12 @@ def loadWifi(SSID, PSW) -> None:
     try:
         with open('lib/wifiSecure.json', 'r') as file:
             data = json.load(file)
-                    
+        
+        found = False
+        for wifi in data['wifi']:
+            if wifi['ssid'] == SSID:
+                data['wifi'].remove(wifi)
+                
         data['wifi'].append(dict(ssid=SSID, psw=PSW))
         
         with open('lib/wifiSecure.json', 'w') as file:
