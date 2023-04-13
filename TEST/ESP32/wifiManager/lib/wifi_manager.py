@@ -5,7 +5,6 @@ import time
 import uasyncio
 from lib.microdot_asyncio import Microdot, Response, send_file, redirect
 from lib.microdot_utemplate import render_template
-#from lib.microdot import redirect
 
 class WIFIManager:    
     
@@ -48,7 +47,7 @@ class WIFIManager:
         while not self.AP.active():
             pass
         
-        print('Connection successful')
+        print('AP on ')
         print(self.AP.ifconfig())        
             
         #define routing
@@ -60,9 +59,12 @@ class WIFIManager:
             self.__app.run(port=80)
         except:
             self.__app.shutdown()
+        self.AP.active(False)
+        print('AP off')
             
             
     def define_route(self):
+       
         @self.__app.get('/')
         def get_index_html(req):
             
@@ -72,8 +74,6 @@ class WIFIManager:
             for (ssid, bssid, channel, RSSI, authmode, hidden) in nets:
                 lst.append(ssid.decode('utf-8'))
             print(lst)
-            # template = render_template('index.html', ssids = lst)
-            # print(template)
             print(req.args)
             params = {'ssids': lst, 'err': (None if req.args.get('err') == None else req.args.get('err'))}
             return render_template('index.html', **params), 200, {'Content-Type': 'text/html'}
@@ -85,13 +85,14 @@ class WIFIManager:
             ssid=req.form.get('ssid')
             psw=req.form.get('psw')
             save_wifi=True if req.form.get('saveWifi') == "true" else False
-            if(self.tryConnection(ssid, psw, save_wifi)):                
+            if(self.tryConnection(ssid, psw, save_wifi)):
+                req.app.shutdown()
                 return """<html>
-                                <body>
+                                <body align='center'>
                                     <h1>Connected to wifi!!</h1>
                                 </body>
                             </html>""", 200, {'Content-Type': 'text/html'}
-                self.AP.active(False)
+                
             else:
                 return redirect('/?err=impossible to connect')
             
