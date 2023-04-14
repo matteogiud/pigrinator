@@ -3,8 +3,9 @@ from lib.wifiSecure import loadWifi, search
 import network
 import time
 import uasyncio
-from lib.microdot_asyncio import Microdot, Response, send_file, redirect
+from lib.microdot_asyncio import Microdot, Response, redirect
 from lib.microdot_utemplate import render_template
+
 
 class WIFIManager:    
     
@@ -13,6 +14,8 @@ class WIFIManager:
     #Response.default_content_type = 'text/html'
 
     def __init__(self):
+        self.led_status = machine.Pin(2, machine.Pin.OUT)
+        self.led_status.off()
         self.wlan = network.WLAN(network.STA_IF)
         self.wlan.active(True)
         self.AP = network.WLAN(network.AP_IF)
@@ -23,7 +26,8 @@ class WIFIManager:
     def addWifiSetting(self, SSID, PSW):
         loadWifi(SSID, PSW)
         
-    def connect(self) -> network.WLAN:
+    def connect(self, wifi_settings=None) -> network.WLAN:
+        self.wifi_settings=wifi_settings
         if not self.wlan.isconnected():
             nets = self.wlan.scan()
             for (ssid, bssid, channel, RSSI, authmode, hidden) in nets:
@@ -31,16 +35,21 @@ class WIFIManager:
                 pswFound = search(ssid.decode("utf-8"))
                 if pswFound != None:
                     if self.tryConnection(ssid.decode("utf-8"), pswFound):
+                        self.led_status.on()
                         return self.wlan           
             print("Net not found")
             self.openAP()
+            self.led_status.off()
         else:
-            print('connected :', self.wlan.ifconfig())
+            if not self.wifi_settings is None:
+                self.wlan.ifconfig(wifi_settings)
+            print('Connected :', self.wlan.ifconfig())
+            self.led_status.on()
             
             # not found any network
             
             
-    def openAP(self):       
+    def openAP(self):               
         
         self.AP.active(True)
         self.AP.config(essid="PIGRINATOR", password="pigrinator")
@@ -105,12 +114,16 @@ class WIFIManager:
             if time.ticks_diff(time.ticks_ms(), t) > 5000:
                 self.wlan.disconnect()
                 print("Timeout. Could not connect.")
+                self.led_status.off()
                 return False
         if self.wlan.isconnected():
-            print("Connected to wifi " + SSID)
+            if not self.wifi_settings is None:
+                self.wlan.ifconfig(self.wifi_settings)
+            print("Connected to wifi ", SSID , self.wlan.ifconfig())
             if save_connection:
                 loadWifi(SSID, PSW)
-                print('Connection saved')                
+                print('Connection saved')
+                self.led_status.on()
             return True
         else:
             try:
@@ -118,4 +131,5 @@ class WIFIManager:
             except:
                 pass
             print("Cannot connect to wifi")
+            self.led_status.off()
             return False
