@@ -18,7 +18,9 @@
         <Button
             android:id="@+id/button"
             android:layout_width="match_parent"
-            android:layout_height="59dp"
-            android:text="Button" />
+            android:layout_height="wrap_content"
+            android:text="PORTAMI L'ACQUA"
+
+            />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
