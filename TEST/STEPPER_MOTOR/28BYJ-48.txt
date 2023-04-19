@@ -1,0 +1,3 @@
+steps/revolution: 2048 
+min speed between steps: 2ms
+max speed: 500 steps/s
