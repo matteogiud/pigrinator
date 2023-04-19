@@ -1,111 +1,80 @@
 import machine
-import utime
+LOW = 0
+HIGH = 1
+FULL_ROTATION = int(4075.7728395061727 / 8) # http://www.jangeox.be/2013/10/stepper-motor-28byj-48_25.html
 
+HALF_STEP = [
+    [LOW, LOW, LOW, HIGH],
+    [LOW, LOW, HIGH, HIGH],
+    [LOW, LOW, HIGH, LOW],
+    [LOW, HIGH, HIGH, LOW],
+    [LOW, HIGH, LOW, LOW],
+    [HIGH, HIGH, LOW, LOW],
+    [HIGH, LOW, LOW, LOW],
+    [HIGH, LOW, LOW, HIGH],
+]
 
-class StepperMotor:
-    def __init__(self, pin1, pin2, pin3, pin4):
-        # Definiamo i pin per controllare il motore stepper
-        self.coil_A_1_pin = machine.Pin(pin1, machine.Pin.OUT)
-        self.coil_A_2_pin = machine.Pin(pin2, machine.Pin.OUT)
-        self.coil_B_1_pin = machine.Pin(pin3, machine.Pin.OUT)
-        self.coil_B_2_pin = machine.Pin(pin4, machine.Pin.OUT)
+FULL_STEP = [
+ [HIGH, LOW, HIGH, LOW],
+ [LOW, HIGH, HIGH, LOW],
+ [LOW, HIGH, LOW, HIGH],
+ [HIGH, LOW, LOW, HIGH]
+]
 
-        # Definiamo la sequenza dei pin di controllo del motore stepper
-        self.seq = [[1, 0, 0, 1],
-                    [1, 0, 0, 0],
-                    [1, 1, 0, 0],
-                    [0, 1, 0, 0],
-                    [0, 1, 1, 0],
-                    [0, 0, 1, 0],
-                    [0, 0, 1, 1],
-                    [0, 0, 0, 1]]
+class Command():
+    """Tell a stepper to move X many steps in direction"""
+    def __init__(self, stepper, steps, direction=1):
+        self.stepper = stepper
+        self.steps = steps
+        self.direction = direction
 
-    # Definiamo la funzione per far girare il motore
-    def step(self, delay, steps):
-        for i in range(steps):
-            for halfstep in range(8):
-                for pin in range(4):
-                    if self.seq[halfstep][pin] != 0:
-                        if pin == 0:
-                            self.coil_A_1_pin.on()
-                        elif pin == 1:
-                            self.coil_A_2_pin.on()
-                        elif pin == 2:
-                            self.coil_B_1_pin.on()
-                        elif pin == 3:
-                            self.coil_B_2_pin.on()
-                    else:
-                        if pin == 0:
-                            self.coil_A_1_pin.off()
-                        elif pin == 1:
-                            self.coil_A_2_pin.off()
-                        elif pin == 2:
-                            self.coil_B_1_pin.off()
-                        elif pin == 3:
-                            self.coil_B_2_pin.off()
-                utime.sleep_us(delay)
+class Driver():
+    """Drive a set of motors, each with their own commands"""
 
-    # Definiamo la funzione per far girare il motore in una direzione specifica
-    def rotate(self, direction, speed, degrees):
-        # calcoliamo il numero di steps necessari per ruotare di n gradi
-        steps = int(degrees/0.0879)
-        # calcoliamo il ritardo necessario per la velocità desiderata
-        delay = int(1000000/speed)
-        if direction == "CW":
-            self.step(delay, steps)
-        elif direction == "CCW":
-            # invertiamo la sequenza per far girare il motore in senso antiorario
-            self.seq = list(reversed(self.seq))
-            self.step(delay, steps)
-            self.seq = list(reversed(self.seq))  # ripristiniamo la sequenza
+    @staticmethod
+    def run(commands):
+        """Takes a list of commands and interleaves their step calls"""
+        
+        # Work out total steps to take
+        max_steps = sum([c.steps for c in commands])
 
-    # Definiamo la funzione per far girare il motore in entrambe le direzioni
-    def oscillate(self, speed, degrees):
-        self.rotate("CW", speed, degrees)
-        self.rotate("CCW", speed, degrees)
+        count = 0
+        while count != max_steps:
+            for command in commands:
+                # we want to interleave the commands
+                if command.steps > 0:
+                    command.stepper.step(1, command.direction)
+                    command.steps -= 1
+                    count += 1
+        
+class Stepper():
+    def __init__(self, mode, pin1, pin2, pin3, pin4, delay=2):
+        self.mode = mode
+        self.pin1 = machine.Pin(pin1, machine.Pin.OUT)
+        self.pin2 = machine.Pin(pin2, machine.Pin.OUT)
+        self.pin3 = machine.Pin(pin3, machine.Pin.OUT)
+        self.pin4 = machine.Pin(pin4, machine.Pin.OUT)
+        self.delay = delay  # Recommend 10+ for FULL_STEP, 1 is OK for HALF_STEP
+        
+        # Initialize all to 0
+        self.reset()
+        
+    def step(self, count, direction=1):
+        """Rotate count steps. direction = -1 means backwards"""
+        for x in range(count):
+            for bit in self.mode[::direction]:
+                self.pin1.value(bit[0]) 
+                self.pin2.value(bit[1]) 
+                self.pin3.value(bit[2]) 
+                self.pin4.value(bit[3]) 
+                machine.sleep(self.delay)
+        self.reset()
+        
+    def reset(self):
+        # Reset to 0, no holding, these are geared, you can't move them
+        self.pin1.value(0) 
+        self.pin2.value(0) 
+        self.pin3.value(0) 
+        self.pin4.value(0) 
 
-    # Definiamo la funzione per fermare il motore
-    def stop(self):
-        self.coil_A_1_pin.off()
-        self.coil_A_2_pin.off()
-        self.coil_B_1_pin.off()
-        self.coil_B_2_pin.off()
-
-
-class CarMotors:
-    def __init__(self, motor_A: StepperMotor, motor_B: StepperMotor, wheels_diameter=0.067, steps_per_rotation=4096):
-        # Inizializziamo i due motori stepper
-        self.motor_A = motor_A
-        self.motor_B = motor_B
-        self.steps_per_rotation = steps_per_rotation
-        self.wheels_diameter = wheels_diameter
-
-    # Definiamo la funzione per far avanzare la macchinina
-    def forward(self, distance, speed=1024):
-        """Ruota le ruote in senso orario di una distanza in centimetri"""
-        import math
-        degrees = distance * 360 / (self.wheel_diameter * math.pi)
-        self.motor_A.rotate("CW", speed, degrees)
-        self.motor_B.rotate("CCW", speed, degrees)
-
-    # Definiamo la funzione per far retrocedere la macchinina
-    def backward(self, distance, speed=1024):
-        import math
-        degrees = distance * 360 / (self.wheel_diameter * math.pi)
-        self.motor_A.rotate("CCW", speed, degrees)
-        self.motor_B.rotate("CW", speed, degrees)
-
-    # Definiamo la funzione per girare a destra
-    def turn_right(self, degrees, speed=1024):
-        self.motor_A.rotate("CW", speed, degrees)
-        self.motor_B.rotate("CW", speed, degrees)
-
-    # Definiamo la funzione per girare a sinistra
-    def turn_left(self, degrees, speed=1024):
-        self.motor_A.rotate("CCW", speed, degrees)
-        self.motor_B.rotate("CCW", speed, degrees)
-
-    # Definiamo la funzione per fermare la macchinina
-    def stop(self):
-        self.motor_A.stop()
-        self.motor_B.stop()
+    
