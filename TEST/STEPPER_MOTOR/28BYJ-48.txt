@@ -1,3 +1,5 @@
 steps/revolution: 2048 
 min speed between steps: 2ms
 max speed: 500 steps/s
+
+unipolar to bipolar -> 5v to 10v -> 240mA to 200mA/220mA -> uln2003 to H-Bridge like L298N
