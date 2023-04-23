@@ -1,26 +1,25 @@
-from bipolar_stepper import *
-from time import sleep_ms
-from math import pi
+from bipolar_stepper_like_arduino import *
+import time
 
-pins_motor_A = (12, 14, 27, 16)
-bp_st1 = Stepper_28BYJ_48_bipolar(*pins_motor_A)
+stepsPerRevolution = 32
 
-pins_motor_B = (16, 17, 5, 18)
-bp_st2 = Stepper_28BYJ_48_bipolar(*pins_motor_B)
+stp1 = Stepper(stepsPerRevolution, 13, 12, 14, 27)
+stp2 = Stepper(stepsPerRevolution, 26, 25, 33, 32)
 
-motors = CarMotors(bp_st1, bp_st2)
-motors.forward_cm(20)
-sleep_ms(1000)
-motors.left(90, delay_ms=4)
-sleep_ms(1000)
-motors.forward_cm(20)
-sleep_ms(1000)
-motors.left(90, delay_ms=4)
-sleep_ms(1000)
-motors.forward_cm(20)
-sleep_ms(1000)
-motors.left(90, delay_ms=4)
-sleep_ms(1000)
-motors.forward_cm(20)
-sleep_ms(1000)
-motors.left(90, delay_ms=4)
+car_motors = CarMotors(stp1, stp2)
+
+car_motors.forward_cm(20)
+time.sleep(1)
+car_motors.left(90)
+time.sleep(1)
+car_motors.forward_cm(20)
+time.sleep(1)
+
+    
+
+
+# while True:
+#     for i in range(4):
+#         stp1.step_motor(i)
+#         stp2.step_motor(i)
+#         time.sleep(0.002)

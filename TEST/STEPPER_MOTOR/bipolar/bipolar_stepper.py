@@ -1,9 +1,8 @@
 class Stepper_28BYJ_48_bipolar:
 
-    HALFSTEP = [[1, 0, 1, 0],
-                [0, 1, 1, 0],
-                [0, 1, 0, 1],
-                [1, 0, 0, 1]]
+    global HALFSTEP
+    HALFSTEP = [[1, 0, 0, 1], [1, 0, 0, 0], [1, 1, 0, 0], [0, 1, 0, 0], [0, 1, 1, 0], [0, 0, 1, 0], [0, 0, 1, 1], [0, 0, 0, 1]]
+
 
     def __init__(self, pin1, pin2, pin3, pin4):
         from machine import Pin
@@ -14,8 +13,7 @@ class Stepper_28BYJ_48_bipolar:
         self.__step_number = 0
         self.steps_per_revolution = 2048
 
-    def one_step(self, dir: bool):
-        global HALFSTEP
+    def one_step(self, dir: bool = True):       
 
         if (dir):
             self.pin1.value(HALFSTEP[self.__step_number][0])
@@ -29,7 +27,7 @@ class Stepper_28BYJ_48_bipolar:
             self.pin4.value(HALFSTEP[-1-self.__step_number][3])
 
         self.__step_number += 1
-        if self.__step_number > 3:
+        if self.__step_number > 7:
             self.__step_number = 0
 
     def steps(self, count, dir=False, delay=2):
