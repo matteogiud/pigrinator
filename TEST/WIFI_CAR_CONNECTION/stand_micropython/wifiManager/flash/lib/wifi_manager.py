@@ -48,13 +48,7 @@ class WIFIManager:
         else:
             if not self.wifi_settings is None:
                 self.wlan.ifconfig(wifi_settings)
-            ssid = self.wlan.config("essid")
-            print(ssid)
-            psw = search(ssid)
-            self.wifi_credential["ssid"]=ssid 
-            self.wifi_credential["psw"] = psw
-            
-            print(f'Connected to {self.wifi_credential["ssid"]}:', self.wlan.ifconfig())
+            print('Connected :', self.wlan.ifconfig())
             self.led_status.on()
             
             # not found any network
@@ -74,18 +68,17 @@ class WIFIManager:
         self.define_route()
                   
         
+        def run_server():
+            try:
+                self.__app.run(port=80)
+            except:
+                self.__app.shutdown()
+            self.AP.active(False)
+            print('AP off')
+                
+        _thread.start_new_thread(run_server, ())
         
-        _thread.stack_size(8192)  # impostare la dimensione dello stack a 8192 byte
-        _thread.start_new_thread(self.__run_server, ())
-        print("server started")
-        
-    def __run_server(self):
-        try:
-            self.__app.run(port=80)
-        except:
-            self.__app.shutdown()
-        self.AP.active(False)
-        print('AP off')   
+            
             
     def define_route(self):
        
@@ -132,7 +125,6 @@ class WIFIManager:
             
             if json_body["mac_address"] != "C8:F0:9E:53:14:EC":
                 return "forbidden", 403, {'Content-Type': 'text/html'}
-            print(self.wifi_credential)
             if not self.wifi_credential["ssid"] is None and not self.wifi_credential["psw"] is None:
                 if self.wlan.isconnected():
                     return self.wifi_credential, 200, {'Content-Type': 'application/json'}
