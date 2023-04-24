@@ -1,4 +1,3 @@
-#include <Arduino.h>
 #include <Stepper.h>
 #ifndef stepper_car_h
 #define stepper_car_h
