@@ -1,4 +1,4 @@
-#include <Arduino.h>
+
 #include "StepperCar.h"
 
 const int steps_per_revolution = 32;
