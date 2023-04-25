@@ -23,15 +23,14 @@ class WIFIManager:
         self.AP.active(False)
         self.__app = Microdot()
         self.wifi_credential = {"ssid": None, "psw": None}
-        self.openAP()
 
     
     def addWifiSetting(self, SSID, PSW):
         loadWifi(SSID, PSW)
         
-    def connect(self, wifi_settings=None) -> network.WLAN:
-         
-
+    def connect(self, wifi_settings=None) -> network.WLAN:         
+        if not self.AP.active():#se non è attivo l'ap lo accende
+            self.openAP()
         self.wifi_settings=wifi_settings
         if not self.wlan.isconnected():
             nets = self.wlan.scan()
@@ -40,10 +39,10 @@ class WIFIManager:
                 pswFound = search(ssid.decode("utf-8"))
                 if pswFound != None:
                     if self.tryConnection(ssid.decode("utf-8"), pswFound):
-                        self.led_status.on()                        
+                        # self.led_status.on()                        
                         return self.wlan           
             print("Net not found")
-            self.openAP()
+#             self.openAP()
             self.led_status.off()
         else:
             if not self.wifi_settings is None:
@@ -51,6 +50,9 @@ class WIFIManager:
             ssid = self.wlan.config("essid")
             print(ssid)
             psw = search(ssid)
+            if psw is None:
+                self.wlan.disconnect()
+                machine.restart()                    
             self.wifi_credential["ssid"]=ssid 
             self.wifi_credential["psw"] = psw
             
@@ -120,16 +122,23 @@ class WIFIManager:
             else:
                 return redirect('/?err=impossible to connect')
             
-        @self.__app.get('/shutdown')
-        def shutdown(request):
-            request.app.shutdown()
-            return 'The server is shutting down...'
+        @self.__app.post('/shutdown')
+        def shutdown(req):
+            import json; json_body=json.loads(req.body.decode('utf-8'))
 
+            if json_body["mac_address"] != "C8:F0:9E:53:14:EC":
+                return "forbidden", 403, {'Content-Type': 'text/html'}
+            
+            #req.app.shutdown()
+#             t = machine.Timer(0)
+#             t.init(period=5000, mode=machine.Timer.ONE_SHOT, callback=lambda t: self.__close_ap_server(t,req.app))
+            req.app.shutdown()
+            return 'The server is shutting down in 10 seconds...'
 
+    
         @self.__app.post('/getWifiCredential')
         def getWifiCredential(req):
             import json; json_body=json.loads(req.body.decode('utf-8'))
-            
             if json_body["mac_address"] != "C8:F0:9E:53:14:EC":
                 return "forbidden", 403, {'Content-Type': 'text/html'}
             print(self.wifi_credential)
@@ -139,8 +148,8 @@ class WIFIManager:
                 
             return {"notAlreadyConnected": True}, 503, {'Content-Type': 'application/json'}
             
-            
-        
+    
+    
     def tryConnection(self, SSID, PSW, save_connection = False):
         self.wlan.connect(SSID, PSW)
         t = time.ticks_ms()
