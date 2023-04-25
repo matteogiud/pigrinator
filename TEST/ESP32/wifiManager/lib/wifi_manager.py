@@ -22,7 +22,7 @@ class WIFIManager:
         self.AP = network.WLAN(network.AP_IF)
         self.AP.active(False)
         self.__app = Microdot()
-        self.wifi_credential = {"ssid": None, "psw": None}
+        self.wifi_credential = {"ssid": None, "psw": None, "myIp": None}
 
     
     def addWifiSetting(self, SSID, PSW):
@@ -55,6 +55,7 @@ class WIFIManager:
                 machine.restart()                    
             self.wifi_credential["ssid"]=ssid 
             self.wifi_credential["psw"] = psw
+            self.wifi_credential["myIp"] = self.wlan.ifconfig()[0]
             
             print(f'Connected to {self.wifi_credential["ssid"]}:', self.wlan.ifconfig())
             self.led_status.on()
@@ -125,6 +126,8 @@ class WIFIManager:
         @self.__app.post('/shutdown')
         def shutdown(req):
             import json; json_body=json.loads(req.body.decode('utf-8'))
+            import global_vars
+            
 
             if json_body["mac_address"] != "C8:F0:9E:53:14:EC":
                 return "forbidden", 403, {'Content-Type': 'text/html'}
@@ -132,6 +135,7 @@ class WIFIManager:
             #req.app.shutdown()
 #             t = machine.Timer(0)
 #             t.init(period=5000, mode=machine.Timer.ONE_SHOT, callback=lambda t: self.__close_ap_server(t,req.app))
+            global_vars.set_esp_car_ip_address(json_body["actual_ip_address"])
             req.app.shutdown()
             return 'The server is shutting down in 10 seconds...'
 
@@ -142,7 +146,7 @@ class WIFIManager:
             if json_body["mac_address"] != "C8:F0:9E:53:14:EC":
                 return "forbidden", 403, {'Content-Type': 'text/html'}
             print(self.wifi_credential)
-            if not self.wifi_credential["ssid"] is None and not self.wifi_credential["psw"] is None:
+            if not self.wifi_credential["ssid"] is None and not self.wifi_credential["psw"] is None and not self.wifi_credential["myIp"] is None:
                 if self.wlan.isconnected():
                     return self.wifi_credential, 200, {'Content-Type': 'application/json'}
                 
@@ -166,9 +170,10 @@ class WIFIManager:
             if save_connection:
                 loadWifi(SSID, PSW)
                 print('Connection saved')
-                self.wifi_credential["ssid"] = SSID
-                self.wifi_credential["psw"] = PSW
-                self.led_status.on()
+            self.wifi_credential["ssid"] = SSID
+            self.wifi_credential["psw"] = PSW
+            self.wifi_credential["myIp"] = self.wlan.ifconfig()[0]
+            self.led_status.on()
                 
             return True
         else:
