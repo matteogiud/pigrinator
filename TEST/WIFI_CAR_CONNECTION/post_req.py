@@ -1,7 +1,7 @@
 import json
 import requests
 
-data = {"path_id": "1"}
+data = {"path_id": "0"}
 headers = {"Content-Type": "application/json"}
 
 

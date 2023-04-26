@@ -20,48 +20,89 @@ StepperCar stp_car(stp1, stp2);
 StaticJsonDocument<250> jsonDocument;
 std::map<String, int> jsonOrderedMap;
 
+
+void blinkBlueLed()
+{
+  digitalWrite(LED_BUILTIN, HIGH);
+  delay(500);
+  digitalWrite(LED_BUILTIN, LOW);
+  delay(500);
+  digitalWrite(LED_BUILTIN, HIGH);
+}
+
+
 void go_to_destination()
 {
   buisy = true;
 
-  // int numPairs = jsonDocument.size();
-
-  for (const auto &kv : jsonDocument.as<JsonObject>())
+  for (size_t i = 0; i < jsonDocument.size(); i++)
   {
-    const String &key = kv.key().c_str();
-    const int value = kv.value().as<int>();
-
-    delay(1000);
-
-    if (key == "forward")
+    const char *direction = jsonDocument[i]["direction"];
+    int value = jsonDocument[i]["value"];
+    
+    // Esegui il metodo corrispondente in base alla direzione
+    if (strcmp(direction, "right") == 0)
     {
-      /* car.forward(value); */
-      stp_car.forward_cm(value);
-    }
-    else if (key == "backward")
-    {
-      /* car.backward(value); */
-      stp_car.backward_cm(value);
-    }
-    else if (key == "left")
-    {
-      /* car.left(value); */
-      stp_car.left(value);
-    }
-    else if (key == "right")
-    {
-      /* car.right(value); */
       stp_car.right(value);
     }
-
-    jsonOrderedMap.insert({key, value});
-
-    // Stampa la chiave e il valore
-    Serial.print("Chiave: ");
-    Serial.print(key);
-    Serial.print(", Valore: ");
-    Serial.println(value);
+    else if (strcmp(direction, "left") == 0)
+    {
+      stp_car.left(value);
+    }
+    else if (strcmp(direction, "forward") == 0)
+    {
+      stp_car.forward_cm(value);
+    }
+    else if (strcmp(direction, "backward") == 0)
+    {
+      stp_car.backward_cm(value);
+    }
+    else
+    {
+      // Direzione non riconosciuta, stampa un messaggio di errore
+      Serial.println("Direzione non riconosciuta");
+      buisy = false;
+      throw std::runtime_error("Direzione non riconosciuta");
+    }
+    delay(1500);
   }
+  // int numPairs = jsonDocument.size();
+  // for (const auto &kv : jsonDocument.as<JsonObject>())
+  // {
+  //   const String &key = kv.key().c_str();
+  //   const int value = kv.value().as<int>();
+
+  //   delay(1000);
+
+  //   if (key == "forward")
+  //   {
+  //     /* car.forward(value); */
+  //     stp_car.forward_cm(value);
+  //   }
+  //   else if (key == "backward")
+  //   {
+  //     /* car.backward(value); */
+  //     stp_car.backward_cm(value);
+  //   }
+  //   else if (key == "left")
+  //   {
+  //     /* car.left(value); */
+  //     stp_car.left(value);
+  //   }
+  //   else if (key == "right")
+  //   {
+  //     /* car.right(value); */
+  //     stp_car.right(value);
+  //   }
+
+  // jsonOrderedMap.insert({key, value});
+
+  // Stampa la chiave e il valore
+  // Serial.print("Chiave: ");
+  // Serial.print(key);
+  // Serial.print(", Valore: ");
+  // Serial.println(value);
+
   // buisy = false;
 }
 
@@ -69,43 +110,74 @@ void return_to_station()
 {
   buisy = true;
 
-  for (auto it = jsonOrderedMap.rbegin(); it != jsonOrderedMap.rend(); ++it) 
+  for (size_t i = jsonDocument.size() - 1; i > 0; i--)
   {
-    const String key = it->first;
-    const int value = it->second;
-    /*const String &key = it->key().c_str();
-    const int value = it->value().as<int>();*/
+    const char *direction = jsonDocument[i]["direction"];
+    int value = jsonDocument[i]["value"];
 
-    delay(1000);
-
-    if (key == "forward")
+    // Esegui il metodo corrispondente in base alla direzione
+    if (strcmp(direction, "right") == 0)
     {
-      /* car.backward(value); */
-      stp_car.backward_cm(value);
-    }
-    else if (key == "backward")
-    {
-      /* car.forward(value); */
-      stp_car.forward_cm(value);
-    }
-    else if (key == "left")
-    {
-      /* car.right(value); */
-      stp_car.right(value);
-    }
-    else if (key == "right")
-    {
-      /* car.left(value); */
       stp_car.left(value);
     }
-
-    // Stampa la chiave e il valore
-    Serial.print("Chiave: ");
-    Serial.print(key);
-    Serial.print(", Valore: ");
-    Serial.println(value);
+    else if (strcmp(direction, "left") == 0)
+    {
+      stp_car.right(value);
+    }
+    else if (strcmp(direction, "forward") == 0)
+    {
+      stp_car.backward_cm(value);
+    }
+    else if (strcmp(direction, "backward") == 0)
+    {
+      stp_car.forward_cm(value);
+    }
+    else
+    {
+      // Direzione non riconosciuta, stampa un messaggio di errore
+      Serial.println("Direzione non riconosciuta");
+      buisy = false;
+      throw std::runtime_error("Direzione non riconosciuta");
+    }
+    delay(1500);
   }
   buisy = false;
+  // for (auto it = jsonOrderedMap.rbegin(); it != jsonOrderedMap.rend(); ++it)
+  // {
+  //   const String key = it->first;
+  //   const int value = it->second;
+  //   /*const String &key = it->key().c_str();
+  //   const int value = it->value().as<int>();*/
+
+  //   delay(1000);
+
+  //   if (key == "forward")
+  //   {
+  //     /* car.backward(value); */
+  //     stp_car.backward_cm(value);
+  //   }
+  //   else if (key == "backward")
+  //   {
+  //     /* car.forward(value); */
+  //     stp_car.forward_cm(value);
+  //   }
+  //   else if (key == "left")
+  //   {
+  //     /* car.right(value); */
+  //     stp_car.right(value);
+  //   }
+  //   else if (key == "right")
+  //   {
+  //     /* car.left(value); */
+  //     stp_car.left(value);
+  //   }
+
+  //   // Stampa la chiave e il valore
+  //   Serial.print("Chiave: ");
+  //   Serial.print(key);
+  //   Serial.print(", Valore: ");
+  //   Serial.println(value);
+  //}
 }
 
 void followThisPathHandler()
@@ -131,13 +203,35 @@ void followThisPathHandler()
 
   server.send(200, "text/plain", "ok");
   buisy = true;
-  go_to_destination();
+  try
+  {
+    go_to_destination();
+  }
+  catch (const std::exception &e)
+  {
+    Serial.println(e.what());
+    return;
+  }
+  blinkBlueLed();
   Serial.println("arrived to destination");
-  delay(20000);
-  return_to_station();
+  delay(5000);
+  blinkBlueLed();
+  delay(1000);
+  try
+  {
+    return_to_station();
+  }
+  catch (const std::exception &e)
+  {
+    Serial.println(e.what());
+    return;
+  }
+
+  blinkBlueLed();
   Serial.println("returned to station");
   buisy = false;
 }
+
 
 void indexHandler()
 {
@@ -149,6 +243,8 @@ void setup()
 {
   // put your setup code here, to run once:
   Serial.begin(115200);
+
+  pinMode(LED_BUILTIN, OUTPUT);
 
   stp1.setSpeed(1000);
   stp2.setSpeed(1000);

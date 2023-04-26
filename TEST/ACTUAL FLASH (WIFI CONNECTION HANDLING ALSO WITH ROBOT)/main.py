@@ -26,14 +26,16 @@ def goTo(req):
     import lib.paths_handler as paths
     path_id = json_body["path_id"]
     complete_path = paths.search(path_id) #risolvere: ritorna null
-    # print(complete_path)
+    if complete_path is None:
+        return "bad request", 400, {"Content-Type": "text/html"}
+    print(f"[\goTo]: selected path: {complete_path}")
     # car_http_req = f"http://{global_vars.my_vars['esp_car_ip_address']}/followThisPath" #risolvere: prendere ip inviato durante la connessione
     car_http_req = f"http://192.168.1.60/followThisPath"
     # print(car_http_req)
     try:
         response = urequests.post(car_http_req, headers={"Content-Type": "application/json"}, data=json.dumps(complete_path))
         if response.status_code == 200: # solleva un'eccezione se la risposta ha uno stato HTTP diverso da 2XX
-            print(response)
+            print(f"[\goTo]: response status code: {response.status_code}")
             return 'ok', 200, {"Content-Type": "text/html"}
         else:
             return 'Car is not ready', 503 , {"Content-Type": "text/html"}

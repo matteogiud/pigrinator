@@ -37,8 +37,8 @@ void StepperCar::left(int degrees)
 
   for (int i = 0; i < steps_to_do; i++)
   {
-    this->motor_1.step(1);
-    this->motor_2.step(-1);
+    this->motor_1.step(-1);
+    this->motor_2.step(1);
   }
 }
 
@@ -49,7 +49,7 @@ void StepperCar::right(int degrees)
 
   for (int i = 0; i < steps_to_do; i++)
   {
-    this->motor_1.step(-1);
-    this->motor_2.step(1);
+    this->motor_1.step(1);
+    this->motor_2.step(-1);
   }
 }

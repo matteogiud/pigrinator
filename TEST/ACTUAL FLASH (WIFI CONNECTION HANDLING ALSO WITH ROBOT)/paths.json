@@ -1,6 +1,6 @@
 {
    "paths":{
-      "0":{"right":90, "left":10, "forward":50},
-      "1":{"forward":100, "left":45, "forward": 50}
+      "0":[{"direction": "right", "value": 90},{"direction": "left", "value": 90}],
+      "1":[{"direction": "forward", "value":100},{"direction": "left", "value":45}]
    }
 }
