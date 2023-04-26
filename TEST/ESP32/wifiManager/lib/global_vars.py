@@ -1,10 +1,8 @@
 esp_car_ip_address = None
+car_esp_connected = False
 
-def set_esp_car_ip_address(ip_address):
-    global  esp_car_ip_address
-    esp_car_ip_address = ip_address
-    
-def get_esp_car_ip_address():
-    global  esp_car_ip_address
-    return esp_car_ip_address
-    
+def init() -> None:
+    global esp_car_ip_address
+    global car_esp_connected
+    esp_car_ip_address = None
+    car_esp_connected = False

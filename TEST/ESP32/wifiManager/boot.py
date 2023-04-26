@@ -1,6 +1,9 @@
 from lib.wifi_manager import WIFIManager
 from machine import Pin
 from time import sleep_ms
+import lib.global_vars as g
+
+g.init()
 
 wifiManager = WIFIManager()
 

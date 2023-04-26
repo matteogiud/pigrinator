@@ -5,6 +5,7 @@ import uasyncio as asyncio
 from lib.microdot_asyncio import Microdot, Response, send_file, redirect
 from lib.microdot_utemplate import render_template
 from lib.motor_driver import MotorsDriver
+from lib.global_vars import car_esp_connected
 
 MD = MotorsDriver(Pin(27, Pin.OUT), Pin(14, Pin.OUT), Pin(33, Pin.OUT), Pin(32, Pin.OUT), PWM(Pin(26, Pin.OUT)), PWM(Pin(25, Pin.OUT)),1000)
 MD.stop()
@@ -42,6 +43,10 @@ def backward(request):
 def backward(request):
     MD.stop()
     return 'OK', 200
+
+
+while not car_esp_connected:
+    pass
 
 def start_server():    
     try:

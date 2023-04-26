@@ -135,7 +135,8 @@ class WIFIManager:
             #req.app.shutdown()
 #             t = machine.Timer(0)
 #             t.init(period=5000, mode=machine.Timer.ONE_SHOT, callback=lambda t: self.__close_ap_server(t,req.app))
-            global_vars.set_esp_car_ip_address(json_body["actual_ip_address"])
+            global_vars.esp_car_ip_address = json_body["actual_ip_address"]
+            global_vars.car_esp_connected = True
             req.app.shutdown()
             return 'The server is shutting down in 10 seconds...'
 
