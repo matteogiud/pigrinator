@@ -1,0 +1,33 @@
+{% args ssids, err %}
+<!doctype html>
+<html>
+
+    <head>
+        <title>SCEGLI IL WIFI</title>
+    </head>
+
+    <body align="center">
+        <form method="POST" action="/">
+            {% if ssids %}
+                <p><b>Scegli un wifi:</b></p>
+                <select name="ssid">
+                {% for ssid in ssids %}
+                    <option value="{{ssid}}">{{ssid}}</option>        
+                {% endfor %}
+                </select>
+                <br>
+                <span>Password: <input type="password" name="psw"/></span><br>
+                <span><input type="checkbox" name="saveWifi" value="true" checked> mantenere salvata la configurazione</span><br>
+                <input type="submit" content="CONNETTI">
+            {% else %}
+                <h1>No network found!!</h1>
+            {% endif %}
+        </form>
+        <br>
+        {% if err %}
+            <span>{{err}}</span>
+        {%endif%}
+
+    </body>
+
+</html>

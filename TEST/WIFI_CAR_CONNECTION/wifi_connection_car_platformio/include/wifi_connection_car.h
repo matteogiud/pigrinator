@@ -9,6 +9,7 @@
 // const char *esp_ssid = "PIGRINATOR";
 // const char *esp_psw = "";
 
+const char *hostname = "pigrinatorcar";
 const char *serverGetPswCredential = "http://192.168.4.1/getWifiCredential"; // sostituisci con l'URL del server a cui vuoi fare la richiesta GET
 const char *serverShutdown = "http://192.168.4.1/shutdown";                  // sostituisci con l'URL del server a cui vuoi fare la richiesta GET
 const int esp_led = 2;
@@ -98,7 +99,7 @@ const char *connect_to_wifi(const char *esp_ssid, const char *esp_psw) // return
 
                 http.begin(serverShutdown);                         // inizializzo una nuova richiesta per lo spegnimento dell'ap
                 http.addHeader("Content-Type", "application/json"); // aggiungo un header alla richiesta
-                jsonPayloadShutdown.replace("%%IPADDRESS%%", "esp.local");
+                jsonPayloadShutdown.replace("%%IPADDRESS%%", hostname);
                 http.POST(jsonPayloadShutdown); // chiudo l'ap mandandogli come payload il mio indirizzo MAC
 
                 WiFi.disconnect(); // mi disconnetto dall'esp
@@ -107,9 +108,12 @@ const char *connect_to_wifi(const char *esp_ssid, const char *esp_psw) // return
                 delay(2000);
                 if (WiFi.status() == WL_CONNECTED) // se la connessione è andata a buon fine
                 {
-                    if (MDNS.begin("esp32"))
+                    if (MDNS.begin(hostname))
                     {
-                        Serial.println("[WiFi_request] IpAddress: http://esp32.local/");
+                        Serial.print("[WiFi_request] IP Address: [");
+                        Serial.print(WiFi.localIP());
+                        Serial.println("]");
+                        Serial.println("[WiFi_request] Host Name: http://" + String(hostname) + ".local/");
                     }
 
                     Serial.print("[WiFi_request] Connected to ");

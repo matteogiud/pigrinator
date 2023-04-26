@@ -1,0 +1,6 @@
+{
+   "paths":{
+      "0":{"right":90, "left":10, "forward":50},
+      "1":{"forward":100, "left":45, "forward": 50}
+   }
+}
