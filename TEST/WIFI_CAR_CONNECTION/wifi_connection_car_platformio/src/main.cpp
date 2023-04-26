@@ -33,7 +33,7 @@ void blinkBlueLed()
 
 void go_to_destination()
 {
-  buisy = true;
+  //buisy = true;
 
   for (size_t i = 0; i < jsonDocument.size(); i++)
   {
@@ -43,25 +43,29 @@ void go_to_destination()
     // Esegui il metodo corrispondente in base alla direzione
     if (strcmp(direction, "right") == 0)
     {
+      Serial.println("right: " + String(value));
       stp_car.right(value);
     }
     else if (strcmp(direction, "left") == 0)
     {
+      Serial.println("left: " + String(value));
       stp_car.left(value);
     }
     else if (strcmp(direction, "forward") == 0)
     {
+      Serial.println("forward: " + String(value));
       stp_car.forward_cm(value);
     }
     else if (strcmp(direction, "backward") == 0)
     {
+      Serial.println("backward: " + String(value));
       stp_car.backward_cm(value);
     }
     else
     {
       // Direzione non riconosciuta, stampa un messaggio di errore
       Serial.println("Direzione non riconosciuta");
-      buisy = false;
+      //buisy = false;
       throw std::runtime_error("Direzione non riconosciuta");
     }
     delay(1500);
@@ -108,40 +112,44 @@ void go_to_destination()
 
 void return_to_station()
 {
-  buisy = true;
+  //buisy = true;  
 
-  for (size_t i = jsonDocument.size() - 1; i > 0; i--)
+  for (size_t i = jsonDocument.size(); i > 0; i--)
   {
-    const char *direction = jsonDocument[i]["direction"];
-    int value = jsonDocument[i]["value"];
-
+    delay(1500);
+    const char *direction = jsonDocument[i-1]["direction"];
+    int value = jsonDocument[i-1]["value"];
     // Esegui il metodo corrispondente in base alla direzione
     if (strcmp(direction, "right") == 0)
     {
+      Serial.println("left: " + String(value));
       stp_car.left(value);
     }
     else if (strcmp(direction, "left") == 0)
     {
+      Serial.println("right: " + String(value));
       stp_car.right(value);
     }
     else if (strcmp(direction, "forward") == 0)
     {
+      Serial.println("backward: " + String(value));
       stp_car.backward_cm(value);
     }
     else if (strcmp(direction, "backward") == 0)
     {
+      Serial.println("forward: " + String(value));
       stp_car.forward_cm(value);
     }
     else
     {
       // Direzione non riconosciuta, stampa un messaggio di errore
       Serial.println("Direzione non riconosciuta");
-      buisy = false;
+      //buisy = false;
       throw std::runtime_error("Direzione non riconosciuta");
     }
-    delay(1500);
+    
   }
-  buisy = false;
+  //buisy = false;
   // for (auto it = jsonOrderedMap.rbegin(); it != jsonOrderedMap.rend(); ++it)
   // {
   //   const String key = it->first;
@@ -209,6 +217,7 @@ void followThisPathHandler()
   }
   catch (const std::exception &e)
   {
+    //buisy=false;
     Serial.println(e.what());
     return;
   }
@@ -223,6 +232,7 @@ void followThisPathHandler()
   }
   catch (const std::exception &e)
   {
+    //buisy=false;
     Serial.println(e.what());
     return;
   }
