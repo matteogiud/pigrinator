@@ -29,10 +29,25 @@ def newPath(req):
     if not json_body["path"]:        
         return "bad request, syntax error", 400, {"Content-Type": "text/html"}
     
-    if not path.loadPath(json_body["path"]):
+    path_id_created = path.loadPath(json_body["path"])
+    if path_id_created == -1 or path_id_created is None:
         return "bad request, syntax error", 400, {"Content-Type": "text/html"}
     
-    return "ok", 201, {"Content-Type": "text/html"}
+    return {"path_id": path_id_created}, 201, {"Content-Type": "application/json"}
+
+@app.get('/searchPath/<int:path_id>')
+def searchPath(req, path_id):
+    # json_body = json.loads(req.body.decode('utf-8'))
+    print(f"[/searchPath] new request, path_id: {path_id}")        
+    
+    if not path_id:        
+        return "bad request, syntax error", 400, {"Content-Type": "text/html"}
+    
+    path_found = path.search(path_id)
+    if not path_found:
+        return "bad request, syntax error", 400, {"Content-Type": "text/html"}
+    
+    return path_found, 200, {"Content-Type": "application/json"}
 
     
 

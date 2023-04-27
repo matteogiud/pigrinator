@@ -12,25 +12,26 @@ def readFile():
 
 def loadPath(path={}) -> bool:
     if not checkPath(path=path):
-        return False
+        return -1
     try:
         with open('paths.json', 'r') as file:
             data = json.load(file)
 
         new_id = max(map(int, data['paths'].keys())) + 1
 
-        data[str(new_id)] = path
+        data['paths'][str(new_id)] = path
 
         with open('paths.json', 'w') as file:
             json.dump(data, file)
-        print(data)
+            
+        print("[load path] path loaded")
+        
+        return new_id
 
     except Exception as e:
         print(e)
-        return False
+        return -1
     
-    return True
-
 def checkPath(path={}):
     if not path:
         return False

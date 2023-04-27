@@ -22,7 +22,7 @@ print("Is Connecting...")
 wifiManager.connect()
 while not wifiManager.car_robot_connected:
     pass
-print (f"[boot] ip address before setting: {global_vars.esp_car_ip_address}")
+print (f"[boot] mdns car before setting: {global_vars.esp_car_mdns_hostname}")
 global_vars.esp_car_ip_address = wifiManager.car_robot_ip_address
 print (f"[boot] ip address after setting: {global_vars.esp_car_ip_address}")
 

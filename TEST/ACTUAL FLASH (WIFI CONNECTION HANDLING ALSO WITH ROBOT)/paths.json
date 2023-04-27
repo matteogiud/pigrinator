@@ -1,7 +1,1 @@
-{
-   "paths":{
-      "0":[{"direction": "right", "value": 90},{"direction": "left", "value": 90}],
-      "1":[{"direction": "forward", "value":100},{"direction": "left", "value":45}],
-      "2":[{"direction": "forward", "value":100},{"direction": "left", "value":90},{"direction": "forward", "value":20},{"direction": "right", "value":45},{"direction": "forward", "value":100}]
-   }
-}
+{"paths": {"4": [{"direction": "forward", "value": 150}, {"direction": "right", "value": 90}], "1": [{"direction": "forward", "value": 100}, {"direction": "left", "value": 45}], "0": [{"direction": "right", "value": 90}, {"direction": "left", "value": 90}], "3": [{"direction": "forward", "value": 150}, {"direction": "right", "value": 90}], "2": [{"direction": "forward", "value": 100}, {"direction": "left", "value": 90}, {"direction": "forward", "value": 20}, {"direction": "right", "value": 45}, {"direction": "forward", "value": 100}]}}
