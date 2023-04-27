@@ -27,7 +27,6 @@ class WIFIManager:
         self.__app = Microdot()
         self.wifi_credential = {"ssid": None, "psw": None, "myIp": None}
         self.car_robot_connected = False #indica se il robot si è collegato alla rete oppure no
-        self.car_robot_ip_address = None
 
     
     def addWifiSetting(self, SSID, PSW):
@@ -138,7 +137,7 @@ class WIFIManager:
             
             @req.after_request
             def shutdown(req, res):
-                print("after shutdown req")
+                print("waiting to esp car connecting")
 #                 check_esp_car_connection_timer = machine.Timer(0)
 #                 check_esp_car_connection_timer.init(period=5000, mode=machine.Timer.ONE_SHOT, callback=self.check_esp_car_connection)
                 time.sleep(5)
@@ -147,11 +146,13 @@ class WIFIManager:
                     req.app.shutdown()
                 else:
                     print("robot not already connected")
+                print("robot connected")
                 return 'The server is shutting down...'
 
 
             print("ip: ", json_body["actual_ip_address"])
-            global_vars.my_vars["esp_car_ip_address"] = json_body["actual_ip_address"]
+            global_vars.esp_car_mdns_hostname = json_body["actual_ip_address"]
+            print(f"[shutdown request] ip saved: {global_vars.esp_car_mdns_hostname}")
             # self.car_robot_connected = True
             print("AP shutting down...")
             
@@ -179,9 +180,12 @@ class WIFIManager:
         import utils
         
         
-        esp_car_ip = utils.get_ip_from_mdns() # mi trova l'ip dell'esp32
+        esp_car_ip = utils.get_ip_from_mdns(global_vars.esp_car_mdns_hostname) # mi trova l'ip dell'esp32
         # http_esp_car_request = f"http://{esp_car_ip}/"
         print(f"ip: {esp_car_ip}")
+        if esp_car_ip is None: # se non è stato trovato l'ip allora setto che il robot non è pronto
+            self.car_robot_connected = False
+            return
         http_esp_car_request = f"http://{esp_car_ip}/"
         time_to_try = 5
         while time_to_try > 0:

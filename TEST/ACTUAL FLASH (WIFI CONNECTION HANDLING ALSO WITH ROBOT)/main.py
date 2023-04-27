@@ -5,7 +5,7 @@ from lib.microdot_asyncio import Microdot, Response, send_file, redirect
 from lib.microdot_utemplate import render_template
 import urequests
 from lib.wifi_manager import WIFIManager
-import lib.global_vars as global_vars
+import global_vars
 
 
 
@@ -14,7 +14,7 @@ import lib.global_vars as global_vars
 
 
 #setup webserver
-print(f"car ip: [{global_vars.esp_car_ip_address}]")
+print(f"[main] car ip: [{global_vars.esp_car_ip_address}]")
 
 app = Microdot()
 
@@ -29,8 +29,8 @@ def goTo(req):
     if complete_path is None:
         return "bad request", 400, {"Content-Type": "text/html"}
     print(f"[\goTo]: selected path: {complete_path}")
-    # car_http_req = f"http://{global_vars.my_vars['esp_car_ip_address']}/followThisPath" #risolvere: prendere ip inviato durante la connessione
-    car_http_req = f"http://192.168.1.60/followThisPath"
+    car_http_req = f"http://{global_vars.esp_car_ip_address}/followThisPath" #risolvere: prendere ip inviato durante la connessione
+    # car_http_req = f"http://192.168.1.60/followThisPath"
     # print(car_http_req)
     try:
         response = urequests.post(car_http_req, headers={"Content-Type": "application/json"}, data=json.dumps(complete_path))

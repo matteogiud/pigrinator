@@ -1,6 +1,8 @@
 import socket
 
-def get_ip_from_mdns(mdns="pigrinatorcar"):
+def get_ip_from_mdns(mdns):
+    if mdns is None:
+        return None
     try:
         try:
             addr_info = socket.getaddrinfo(hostname, 80)[0]

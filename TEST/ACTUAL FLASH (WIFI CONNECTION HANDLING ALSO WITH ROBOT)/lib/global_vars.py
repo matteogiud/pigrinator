@@ -1,9 +1,9 @@
-my_vars = {"esp_car_ip_address": None}
 esp_car_ip_address: str = None
+esp_car_mdns_hostname: str = None
 
 def init():
-    global my_vars
     global esp_car_ip_address
-    my_vars = {"esp_car_ip_address": None}
-    esp_car_ip_address = None
+    global esp_car_mdns_hostname
     
+    esp_car_ip_address = None
+    esp_car_mdns_hostname = None
