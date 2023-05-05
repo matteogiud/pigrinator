@@ -27,6 +27,7 @@ class WIFIManager:
         self.__app = Microdot()
         self.wifi_credential = {"ssid": None, "psw": None, "myIp": None}
         self.car_robot_connected = False #indica se il robot si è collegato alla rete oppure no
+        self.mdns_hostname = "pigrinatorstand"
 
     
     def addWifiSetting(self, SSID, PSW):
@@ -205,7 +206,8 @@ class WIFIManager:
         
         
     
-    def tryConnection(self, SSID, PSW, save_connection = False):
+    def tryConnection(self, SSID, PSW, save_connection = False):        
+        self.wlan.config(dhcp_hostname = self.mdns_hostname) # mdns configure
         self.wlan.connect(SSID, PSW)
         t = time.ticks_ms()
         while not self.wlan.isconnected():
@@ -214,10 +216,11 @@ class WIFIManager:
                 print("Timeout. Could not connect.")
                 self.led_status.off()
                 return False
-        if self.wlan.isconnected():
+        if self.wlan.isconnected():            
             if not self.wifi_settings is None:
                 self.wlan.ifconfig(self.wifi_settings)
-            print("Connected to wifi ", SSID , self.wlan.ifconfig())
+            host = self.wlan.config('dhcp_hostname') 
+            print("Connected to wifi ", SSID , self.wlan.ifconfig(), "hostname:", host)
             if save_connection:
                 loadWifi(SSID, PSW)
                 print('Connection saved')
