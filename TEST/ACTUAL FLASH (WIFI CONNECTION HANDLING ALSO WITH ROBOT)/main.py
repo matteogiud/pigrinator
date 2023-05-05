@@ -21,6 +21,11 @@ print(f"[main] car ip: [{global_vars.esp_car_ip_address}]")
 app = Microdot()
 
 
+@app.get('/searchAllPaths')
+def searchAllPath(req):
+    paths = path.search_all()
+    return paths, 200, {"Content-Type": "application/json"}
+
 @app.put('/newPath')
 def newPath(req):
     json_body = json.loads(req.body.decode('utf-8'))

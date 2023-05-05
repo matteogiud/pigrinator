@@ -67,3 +67,13 @@ def search(path_id) -> str:
     except Exception as e:
         print("[paths_handler]: ", e)
         return None
+    
+def search_all() -> str:
+    try:
+        with open('paths.json', 'r') as file:
+            data = json.load(file)
+
+        return data["paths"]
+    except Exception as e:
+        print("[paths_handler]: ", e)
+        return None
