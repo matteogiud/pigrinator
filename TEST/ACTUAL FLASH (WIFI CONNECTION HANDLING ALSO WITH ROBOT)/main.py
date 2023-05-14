@@ -8,6 +8,7 @@ from lib.wifi_manager import WIFIManager
 import global_vars
 import json
 import lib.paths_handler as path
+from machine import Pin
 
 
 
@@ -19,6 +20,43 @@ import lib.paths_handler as path
 print(f"[main] car ip: [{global_vars.esp_car_ip_address}]")
 
 app = Microdot()
+
+pump = Pin(23, Pin.OUT)
+pump.off()
+
+trigger_pin = Pin(12, Pin.OUT)
+echo_pin = Pin(14, Pin.IN)
+
+def check_glass_position():
+    
+    
+    
+    for i in range(10):
+        trigger_pin.value(1)
+        time.sleep_us(10)
+        trigger_pin.value(0)
+    
+         # Attendi il segnale di echo
+        while echo_pin.value() == 0:
+            pass
+        start_time = time.ticks_us()
+        
+        while echo_pin.value() == 1:
+            pass
+        end_time = time.ticks_us()
+        
+        # Calcola la durata dell'eco
+        durata = end_time - start_time
+        
+        # Calcola la distanza in base alla durata
+        distanza = durata * 0.0343 / 2
+        print("distanza misurata: ", distanza)
+        
+        if distanza > 20:
+            return False
+        
+    return True
+
 
 
 @app.get('/searchAllPaths')
@@ -54,7 +92,19 @@ def searchPath(req, path_id):
     
     return path_found, 200, {"Content-Type": "application/json"}
 
-    
+@app.get('/loadWater')
+def loadWater(req):
+    print("/loadWater")
+    if check_glass_position():
+        try:
+            pump.on()
+            time.sleep(2)
+            pump.off()
+        except:
+            pump.off()
+        return 'OK'
+    else:
+        return 'ERROR'
 
 
 @app.post('/goTo')
@@ -92,7 +142,6 @@ def goTo(req):
 @app.get('/')
 def index(req):
     return 'hello'
-
 
 def start_server():
     try:
